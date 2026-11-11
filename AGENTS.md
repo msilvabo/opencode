@@ -29,6 +29,12 @@ bun --watch run index.ts
 # Verificación de tipos
 bun run typecheck
 
+# Ejecutar los tests automáticos
+bun test
+
+# Ejecutar los tests en modo watch
+bun test --watch
+
 # Compilar a binario ejecutable (objetivo final del proyecto)
 bun build ./index.ts --compile --outfile weather
 ```
@@ -116,6 +122,8 @@ src/
     Weather.ts      # WeatherData, TemperatureUnit y respuestas de Open-Meteo
     Settings.ts     # AppConfig
     MenuOption.ts   # opciones válidas del menú
+  tests/            # tests automáticos con `bun test` (espeja la estructura de src/)
+    helpers/        # soporte: carpeta temporal para datos, spies de fetch y console
   api/              # integración con Open-Meteo
     geocoding.ts    # búsqueda de ciudades por nombre
     weather.ts      # clima actual por coordenadas
@@ -157,4 +165,5 @@ Reglas de dependencia entre capas:
 - [ ] Integrar Forecast API
 - [ ] Persistencia de ciudades
 - [ ] Ajustes de unidades (°C/°F)
+- [x] Tests automáticos con `bun test`
 - [ ] Compilar a binario ejecutable

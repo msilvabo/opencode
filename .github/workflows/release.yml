@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Tests
+        run: bun test
+
+      # Lee la versión de package.json → TAG=v1.0.0
+      - name: Determine version
+        id: version
+        run: echo "tag=v$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+      # Idempotencia: si el tag ya existe, no se crea otro release
+      - name: Check if tag exists
+        id: check
+        run: |
+          if git ls-remote --tags origin "${{ steps.version.outputs.tag }}" | grep -q .; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Crea el tag y el release con notas automáticas
+      - name: Create release
+        if: steps.check.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: gh release create "$TAG" --generate-notes
+
+      # Compila el binario para las 3 plataformas con bun --compile
+      - name: Build binaries
+        run: |
+          bun build ./index.ts --compile --target=bun-windows-x64 --outfile weather-windows-x64.exe
+          bun build ./index.ts --compile --target=bun-linux-x64 --outfile weather-linux-x64
+          bun build ./index.ts --compile --target=bun-darwin-arm64 --outfile weather-macos-arm64
+
+      # Adjunta los binarios al release
+      - name: Upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: gh release upload "$TAG" weather-* --clobber
