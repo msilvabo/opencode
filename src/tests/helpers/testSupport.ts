@@ -1,9 +1,10 @@
 import { mkdirSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, spyOn } from "bun:test";
+import { expect, mock, spyOn } from "bun:test";
 import type { City } from "../../types/City";
 import type { AppConfig } from "../../types/Settings";
+import { isMenuOption } from "../../types/MenuOption";
 
 /**
  * Los tests se ejecutan con el directorio de trabajo dentro de una carpeta
@@ -76,6 +77,28 @@ export interface ConsoleCapture {
   /** Restaura el console.log original. */
   restore: () => void;
 }
+
+/**
+ * Entrada del usuario controlada por cada test. `mock.module` es global al
+ * proceso de Bun y los archivos de test pueden ejecutarse en cualquier
+ * orden (p. ej. en Linux), por eso el mock de `presentation/input` se
+ * registra una sola vez aquí y expone TODAS sus exportaciones.
+ */
+export const inputState = {
+  /** Respuesta de `readOption`. */
+  option: null as string | null,
+  /** Respuesta de `readCityName`. */
+  cityName: null as string | null,
+  /** Respuesta de `readCityChoice`. */
+  cityChoice: 0 as number | null,
+};
+
+mock.module("../../presentation/input", () => ({
+  readOption: () => Promise.resolve(inputState.option),
+  toMenuOption: (raw: string) => (isMenuOption(raw) ? raw : null),
+  readCityName: () => Promise.resolve(inputState.cityName),
+  readCityChoice: () => Promise.resolve(inputState.cityChoice),
+}));
 
 /** Sustituye console.log por un espía que captura cada línea impresa. */
 export function captureConsoleLog(): ConsoleCapture {

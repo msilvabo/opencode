@@ -4,25 +4,18 @@ import {
   asFetch,
   captureConsoleLog,
   expectIsolatedDataFile,
+  inputState,
   makeCity,
   makeConfig,
   removeTestDataFile,
 } from "../helpers/testSupport";
 import type { City } from "../../types/City";
 
-// Entrada del usuario controlada por cada test.
-let cityNameReply: string | null;
-let cityChoiceReply: number;
 // Respuesta de la Geocoding API simulada por cada test.
 let geocodingBody: unknown;
 let geocodingStatus: number;
 let geocodingRejects: boolean;
 let fetchCalls: string[];
-
-mock.module("../../presentation/input", () => ({
-  readCityName: () => Promise.resolve(cityNameReply),
-  readCityChoice: () => Promise.resolve(cityChoiceReply),
-}));
 
 const { addCity } = await import("../../actions/addCity");
 
@@ -31,8 +24,8 @@ beforeEach(() => {
   // Guardia: los tests nunca deben leer ni escribir el cities.json real.
   expectIsolatedDataFile();
 
-  cityNameReply = null;
-  cityChoiceReply = 0;
+  inputState.cityName = null;
+  inputState.cityChoice = 0;
   geocodingBody = { results: [] };
   geocodingStatus = 200;
   geocodingRejects = false;
@@ -78,7 +71,7 @@ const ottawaResult = {
 
 describe("addCity", () => {
   test("agrega la primera ciudad y la convierte en default", async () => {
-    cityNameReply = "Ottawa";
+    inputState.cityName = "Ottawa";
     geocodingBody = { results: [ottawaResult] };
     const config = makeConfig();
 
@@ -93,7 +86,7 @@ describe("addCity", () => {
   });
 
   test("consulta la Geocoding API con el nombre ingresado", async () => {
-    cityNameReply = "Ottawa";
+    inputState.cityName = "Ottawa";
     geocodingBody = { results: [ottawaResult] };
 
     await runAddCity(makeConfig());
@@ -107,7 +100,7 @@ describe("addCity", () => {
       cities: [makeCity()],
       defaultCity: makeCity(),
     });
-    cityNameReply = "Ottawa";
+    inputState.cityName = "Ottawa";
     geocodingBody = { results: [ottawaResult] };
 
     const lines = await runAddCity(config);
@@ -117,7 +110,7 @@ describe("addCity", () => {
   });
 
   test("avisa si la ciudad no fue encontrada", async () => {
-    cityNameReply = "Ahoraheroadsadfh";
+    inputState.cityName = "Ahoraheroadsadfh";
     geocodingBody = {};
 
     const lines = await runAddCity(makeConfig());
@@ -126,7 +119,7 @@ describe("addCity", () => {
   });
 
   test("no llama a la API si no se ingresó ningún nombre", async () => {
-    cityNameReply = "";
+    inputState.cityName = "";
 
     await runAddCity(makeConfig());
 
@@ -134,8 +127,8 @@ describe("addCity", () => {
   });
 
   test("con varios candidatos elige el elegido por el usuario", async () => {
-    cityNameReply = "Ottawa";
-    cityChoiceReply = 2;
+    inputState.cityName = "Ottawa";
+    inputState.cityChoice = 2;
     geocodingBody = {
       results: [
         ottawaResult,
@@ -153,8 +146,8 @@ describe("addCity", () => {
   });
 
   test("cancela la selección con la opción 0", async () => {
-    cityNameReply = "Ottawa";
-    cityChoiceReply = 0;
+    inputState.cityName = "Ottawa";
+    inputState.cityChoice = 0;
     geocodingBody = { results: [ottawaResult, { ...ottawaResult, name: "Ottawa II" }] };
     const config = makeConfig();
 
@@ -165,7 +158,7 @@ describe("addCity", () => {
   });
 
   test("avisa de errores de red sin romper el flujo", async () => {
-    cityNameReply = "Ottawa";
+    inputState.cityName = "Ottawa";
     geocodingRejects = true;
 
     const lines = await runAddCity(makeConfig());
