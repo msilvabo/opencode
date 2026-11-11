@@ -19,10 +19,8 @@ async function main(): Promise<void> {
   const config: AppConfig = { ...citiesState, unit };
 
   let running = true;
-
-
-  
-  console.log("¡Bienvenido a Weather CLI!");
+ 
+  console.log("¡Bienvenido a Weather CLI!!!!!!!!!!");
 
   while (running) {
     renderMenu(config.cities.length, config.unit);
