@@ -1,16 +1,6 @@
-import type { City } from "../models";
-
-interface GeocodingResponse {
-  results?: Array<{
-    name: string;
-    country?: string;
-    country_code?: string;
-    latitude: number;
-    longitude: number;
-    timezone?: string;
-    population?: number;
-  }>;
-}
+import type { City } from "../types/City";
+import type { GeocodingResponse } from "../types/Weather";
+import { GEOCODING_API_URL } from "../utils/constants";
 
 /**
  * Paso 1 del flujo: convierte el nombre de una ciudad en coordenadas.
@@ -25,9 +15,7 @@ export async function searchCities(name: string): Promise<City[]> {
     format: "json",
   });
 
-  const response = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`,
-  );
+  const response = await fetch(`${GEOCODING_API_URL}?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error(`El servicio de geocoding respondió con el error ${response.status}`);

@@ -1,10 +1,5 @@
-import type { TemperatureUnit } from "../models";
-
-interface ForecastResponse {
-  current?: {
-    temperature_2m?: number;
-  };
-}
+import type { ForecastResponse, TemperatureUnit } from "../types/Weather";
+import { FORECAST_API_URL } from "../utils/constants";
 
 /**
  * Paso 2 del flujo: obtiene la temperatura actual a partir de coordenadas.
@@ -22,9 +17,7 @@ export async function getCurrentTemperature(
     temperature_unit: unit,
   });
 
-  const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?${params.toString()}`,
-  );
+  const response = await fetch(`${FORECAST_API_URL}?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error(`El servicio del clima respondió con el error ${response.status}`);

@@ -95,15 +95,41 @@ Mantener el código organizado por responsabilidades (no escribir todo en `index
 
 ```
 src/
-  index.ts        # punto de entrada: bucle del menú
-  menu.ts         # render del menú y lectura de opciones
-  api/
-    geocoding.ts  # búsqueda de ciudades por nombre
-    weather.ts    # consulta del clima
-  models.ts       # tipos: City, WeatherData, Settings
-  storage.ts      # lectura/escritura del JSON de configuración
-  ui.ts           # helpers de salida en consola (tablas, colores)
+  index.ts          # punto de entrada: bucle del menú y dispatch de opciones
+  actions/          # acciones principales que puede ejecutar el usuario
+    getWeather.ts   # clima de la ciudad default y de todas las guardadas
+    addCity.ts      # buscar y agregar ciudad
+    removeCity.ts   # eliminar ciudad
+    setDefaultCity.ts # establecer la ciudad default
+    listCities.ts   # listar ciudades guardadas
+    changeUnit.ts   # alternar unidad de temperatura (°C/°F)
+  presentation/     # interacción de consola/CLI
+    menu.ts         # render del menú
+    input.ts        # lectura y validación de inputs (lector propio de stdin)
+    output.ts       # mensajes y listados en consola
+  storage/          # persistencia local en cities.json
+    configFile.ts   # lectura/escritura de bajo nivel (helper compartido)
+    citiesStorage.ts   # ciudades guardadas y ciudad default
+    settingsStorage.ts # unidad de temperatura
+  types/            # tipos y contratos globales
+    City.ts
+    Weather.ts      # WeatherData, TemperatureUnit y respuestas de Open-Meteo
+    Settings.ts     # AppConfig
+    MenuOption.ts   # opciones válidas del menú
+  api/              # integración con Open-Meteo
+    geocoding.ts    # búsqueda de ciudades por nombre
+    weather.ts      # clima actual por coordenadas
+  utils/            # utilidades reutilizables
+    format.ts       # formateadores (ubicación, población, continente)
+    constants.ts    # rutas de APIs y archivo de datos
+    colors.ts       # colores ANSI para la consola
 ```
+
+Reglas de dependencia entre capas:
+
+- `actions/` puede importar de cualquier capa.
+- `presentation/`, `api/` y `storage/` solo importan de `types/` y `utils/`.
+- `index.ts` orquesta: carga la configuración y despacha cada opción del menú a su acción.
 
 ## Convenciones de código
 

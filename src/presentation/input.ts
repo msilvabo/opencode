@@ -1,22 +1,4 @@
-import type { TemperatureUnit } from "./models";
-import { ansi } from "./ui";
-
-export function renderMenu(cityCount: number, unit: TemperatureUnit): void {
-  const symbol = unit === "celsius" ? "°C" : "°F";
-
-  console.log(ansi.cyan(`
-════════════════════════════════════════
-         WEATHER CLI
-════════════════════════════════════════`));
-  console.log(`  1. Clima de ciudad default
-  2. Clima de todas las ciudades (${cityCount})
-  3. Buscar y agregar ciudad
-  4. Eliminar ciudad
-  5. Establecer ciudad default
-  8. Ajustes (${ansi.yellow(symbol)})
-  9. Salir`);
-  console.log(ansi.cyan("════════════════════════════════════════"));
-}
+import { isMenuOption, type MenuOption } from "../types/MenuOption";
 
 /**
  * Lector de líneas propio. La API `node:readline` de Bun 1.4.4 cierra la
@@ -80,9 +62,18 @@ async function readLine(promptText: string): Promise<string | null> {
   return shiftLine();
 }
 
+/**
+ * Lee la opción del menú. Devuelve la entrada tal cual (aunque no sea
+ * válida, para poder mostrarla al usuario) o `null` si stdin llega a EOF.
+ */
 export async function readOption(): Promise<string | null> {
   const option = await readLine("  Selecciona una opción: ");
   return option?.trim() ?? null;
+}
+
+/** Convierte la entrada cruda del menú en una opción válida o `null`. */
+export function toMenuOption(raw: string): MenuOption | null {
+  return isMenuOption(raw) ? raw : null;
 }
 
 export async function readCityName(): Promise<string | null> {
