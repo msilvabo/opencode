@@ -15,8 +15,8 @@ El objetivo de esta aplicación es que creemos una aplicación de consola que pi
 
 ## Ejemplo de petición http:
 
-1. Paso 1: Geocoding API.
-2. Paso 2: OpenMeteo API.
+1. Paso 1: Geocoding API....
+2. Paso 2: OpenMeteo API....
 
 ```
 https://geocoding-api.open-meteo.com/v1/search?name=Ottawa&count=1&language=es&format=json
