@@ -20,6 +20,8 @@ async function main(): Promise<void> {
 
   let running = true;
 
+
+  
   console.log("¡Bienvenido a Weather CLI!");
 
   while (running) {
